@@ -30,7 +30,7 @@ import lombok.Setter;
 public class SolicitacaoAbono extends EntidadeAuditavel {
     
     @Column(nullable = false, length = 100)
-    private String nomeAluno;
+    private String nome;
 
     @Column(nullable = false)
     private String matricula;
@@ -42,24 +42,24 @@ public class SolicitacaoAbono extends EntidadeAuditavel {
     private String periodo;
 
     @Column(nullable = false, length = 5)
-    private String turnoCurso;
+    private String turno;
 
     @Column(nullable = false, length = 255)
-    private String emailAluno;
+    private String email;
 
     @Column(nullable = false, length = 11)
-    private String cpfAluno;
+    private String cpf;
 
     @Column(nullable = false, length = 255)
     private String anexo; // Caminho ou nome do arquivo anexado
 
     @Column(nullable = false)
     @DateTimeFormat(pattern = "dd/MM/yyyy")
-    private LocalDate dataInicio;
+    private LocalDate inicioFalta;
 
     @Column(nullable = false)
     @DateTimeFormat(pattern = "dd/MM/yyyy")
-    private LocalDate dataFim;
+    private LocalDate fimFalta;
 
     @Column(nullable = false, length = 255)
     private String motivo;

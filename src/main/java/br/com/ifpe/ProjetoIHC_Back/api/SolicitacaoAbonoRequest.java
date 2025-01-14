@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 
 public class SolicitacaoAbonoRequest {
     
-    private String nomeAluno;
+    private String nome;
     
     private String matricula;
     
@@ -25,18 +25,18 @@ public class SolicitacaoAbonoRequest {
     
     private String periodo;
     
-    private String turnoCurso;
+    private String turno;
     
-    private String emailAluno;
+    private String email;
     
-    private String cpfAluno;
+    private String cpf;
     
     private String anexo; // Caminho ou nome do arquivo anexado
     
     
-    private LocalDate dataInicio;
+    private LocalDate inicioFalta;
     
-    private LocalDate dataFim;
+    private LocalDate fimFalta;
     
     private String motivo;
     
@@ -47,16 +47,16 @@ public class SolicitacaoAbonoRequest {
     public SolicitacaoAbono builder(){
         
         return SolicitacaoAbono.builder()
-            .nomeAluno(nomeAluno)
+            .nome(nome)
             .matricula(matricula)
             .curso(curso)
             .periodo(periodo)
-            .turnoCurso(turnoCurso)
-            .emailAluno(emailAluno)
-            .emailAluno(emailAluno)
-            .cpfAluno(cpfAluno)
-            .dataInicio(dataInicio)
-            .dataFim(dataFim)
+            .turno(turno)
+            .email(email)
+            .email(email)
+            .cpf(cpf)
+            .inicioFalta(inicioFalta)
+            .fimFalta(fimFalta)
             .motivo(motivo)
             .status(status)
             .dataSolicitacao(dataSolicitacao)
