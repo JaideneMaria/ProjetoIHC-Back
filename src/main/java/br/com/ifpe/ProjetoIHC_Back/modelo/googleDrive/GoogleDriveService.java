@@ -12,6 +12,7 @@ import com.google.auth.oauth2.GoogleCredentials;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
+import com.google.api.services.drive.model.Permission;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -51,14 +52,26 @@ public class GoogleDriveService {
             GoogleCredentials credenciais = GoogleCredentials.fromStream(inputStream)
                     .createScoped(Collections.singleton("https://www.googleapis.com/auth/drive"));
             LOGGER.info("Credenciais do Google carregadas com sucesso.");
-         
+            
             return new Drive.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, new HttpCredentialsAdapter(credenciais))
                     .setApplicationName("ProjetoIHC")
                     .build();
         }
     }
 
-    public String enviarArquivo(String caminhoArquivo, String nomeArquivo, String tipoMime) throws IOException {
+    
+    public void configurarPermissao(String fileId) throws Exception {
+        // Cria uma permissão para permitir download público
+        Permission permissao = new Permission();
+        permissao.setType("anyone"); // Qualquer pessoa
+        permissao.setRole("reader"); // Apenas leitura
+        
+        // Adiciona a permissão ao arquivo
+        servicoDrive.permissions().create(fileId, permissao).execute();
+    }
+
+
+    public String enviarArquivo(String caminhoArquivo, String nomeArquivo, String tipoMime) throws Exception {
         LOGGER.log(Level.INFO, "Enviando arquivo: {0}, Tipo MIME: {1}", new Object[]{nomeArquivo, tipoMime});
         
         File metadadosArquivo = new File();
@@ -72,7 +85,7 @@ public class GoogleDriveService {
                 .execute();
 
         LOGGER.log(Level.INFO, "Arquivo enviado com sucesso. ID do arquivo: {0}", arquivoEnviado.getId());
-
+        configurarPermissao(arquivoEnviado.getId());
         return "https://drive.google.com/uc?id=" + arquivoEnviado.getId();
     }
 
@@ -80,7 +93,7 @@ public class GoogleDriveService {
         LOGGER.info("Listando arquivos do Google Drive...");
 
         FileList resultado = servicoDrive.files().list()
-                .setPageSize(10) // Ajuste conforme necessário
+                .setPageSize(20) // Ajuste conforme necessário
                 .setFields("files(id, name)")
                 .execute();
 
@@ -95,13 +108,14 @@ public class GoogleDriveService {
     }
 
     public void baixarArquivo(String fileId, OutputStream fluxoSaida) throws IOException {
-        LOGGER.log(Level.INFO, "Baixando arquivo com ID: {0}", fileId);
-
-        servicoDrive.files().get(fileId)
-                .executeMediaAndDownloadTo(fluxoSaida);
-
-        LOGGER.info("Arquivo baixado com sucesso.");
+        try {
+            LOGGER.log(Level.INFO, "Baixando arquivo com ID: {0}", fileId);
+            // Recupera o arquivo da API com configuração para download total
+            servicoDrive.files().get(fileId).executeMediaAndDownloadTo(fluxoSaida);
+            LOGGER.info("Arquivo baixado com sucesso.");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erro ao baixar o arquivo com ID: " + fileId, e);
+            throw new IOException("Erro ao baixar o arquivo do Google Drive.", e);
+        }
     }
-
-
 }

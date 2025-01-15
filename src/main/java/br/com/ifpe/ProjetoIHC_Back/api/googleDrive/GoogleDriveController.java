@@ -4,6 +4,7 @@ package br.com.ifpe.ProjetoIHC_Back.api.googleDrive;
 import com.google.api.services.drive.model.File;
 
 import br.com.ifpe.ProjetoIHC_Back.modelo.googleDrive.GoogleDriveService;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -12,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.MediaType;
 
-import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
@@ -29,17 +30,18 @@ public class GoogleDriveController {
 
     // Método para fazer upload de um arquivo ao Google Drive
     @PostMapping("/upload")
-    public ResponseEntity<String> enviarArquivo(@RequestParam("caminhoArquivo") String caminhoArquivo,
-                                               @RequestParam("nomeArquivo") String nomeArquivo,
-                                               @RequestParam("tipoMime") String tipoMime) {
-        try {
-            String urlArquivo = googleDriveService.enviarArquivo(caminhoArquivo, nomeArquivo, tipoMime);
-            return ResponseEntity.ok("Arquivo enviado com sucesso. Acesse aqui: " + urlArquivo);
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Erro ao enviar arquivo", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Falha ao enviar arquivo.");
-        }
+public ResponseEntity<String> enviarArquivo(@RequestParam("caminhoArquivo") String caminhoArquivo,
+                                            @RequestParam("nomeArquivo") String nomeArquivo,
+                                            @RequestParam("tipoMime") String tipoMime) {
+    try {
+        String urlArquivo = googleDriveService.enviarArquivo(caminhoArquivo, nomeArquivo, tipoMime);
+        return ResponseEntity.ok("Arquivo enviado com sucesso. Acesse aqui: " + urlArquivo);
+    } catch (Exception e) {
+        LOGGER.log(Level.SEVERE, "Erro ao enviar arquivo", e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao enviar arquivo.");
     }
+}
+
 
     // Método para listar arquivos no Drive (retorna ID e nome)
     @GetMapping("/arquivos")
@@ -66,14 +68,14 @@ public class GoogleDriveController {
 
     // Método para fazer download de um arquivo pelo fileId
     @GetMapping("/download/{fileId}")
-    public void baixarArquivo(@PathVariable("fileId") String fileId, HttpServletResponse documento) {
+    public void baixarArquivo(@PathVariable("fileId") String fileId, HttpServletResponse response) {
         try {
-            documento.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
-            documento.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=arquivo_" + fileId); 
-            googleDriveService.baixarArquivo(fileId, documento.getOutputStream());
+            response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=arquivo_" + fileId);
+            googleDriveService.baixarArquivo(fileId, response.getOutputStream());
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Erro ao baixar arquivo", e);
-            documento.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            LOGGER.log(Level.SEVERE, "Erro ao baixar o arquivo", e);
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 
