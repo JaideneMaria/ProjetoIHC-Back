@@ -17,7 +17,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
 @Entity
 @Table(name = "solicitacaoAbono")
 @SQLRestriction("habilitado = true")
