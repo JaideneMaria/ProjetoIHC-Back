@@ -10,15 +10,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-
-import org.springframework.web.bind.annotation.RestController;
-
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 @RestController
-@RequestMapping("/api/solicitacoes-abono")
+@RequestMapping("/api/solicitacoes")
 public class SolicitacaoAbonoController {
+
+    private static final Logger LOGGER = Logger.getLogger(SolicitacaoAbonoController.class.getName());
 
     @Autowired
     private SolicitacaoAbonoService solicitacaoAbonoService;
@@ -27,31 +32,51 @@ public class SolicitacaoAbonoController {
     private GoogleDriveService googleDriveService;
 
     @PostMapping
-    public ResponseEntity<String> criarSolicitacao(@ModelAttribute SolicitacaoAbono request,
-                                                   @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<String> criarSolicitacao(
+        @ModelAttribute SolicitacaoAbono request,
+        @RequestParam("file") MultipartFile file
+    ) {
+        String filePath = null;
+
         try {
-            // Salvar arquivo temporariamente
-            String filePath = salvarArquivoTemporariamente(file);
-
-            // Fazer upload para o Google Drive e obter o URL
+            filePath = salvarArquivoTemporariamente(file);
             String fileUrl = googleDriveService.enviarArquivo(filePath, file.getOriginalFilename(), file.getContentType());
-
-            // Salvar o URL do anexo na solicitação
             request.setAnexo(fileUrl);
-
-            // Salvar solicitação no banco de dados
             solicitacaoAbonoService.salvar(request);
-
             return ResponseEntity.ok("Solicitação criada com sucesso!");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao criar solicitação: " + e.getMessage());
+        } finally {
+            if (filePath != null) {
+                deletarArquivoTemporariamente(filePath);
+            }
         }
     }
 
     private String salvarArquivoTemporariamente(MultipartFile file) throws IOException {
-        java.io.File tempFile = java.io.File.createTempFile("upload", file.getOriginalFilename());
+        Path tempDir = Files.createTempDirectory("uploads");
+        File tempFile = File.createTempFile("upload_", file.getOriginalFilename(), tempDir.toFile());
         file.transferTo(tempFile);
         return tempFile.getAbsolutePath();
+    }
+
+    private void deletarArquivoTemporariamente(String filePath) {
+        try {
+            Files.deleteIfExists(Path.of(filePath));
+        } catch (IOException e) {
+            System.err.println("Falha ao deletar arquivo temporário: " + e.getMessage());
+        }
+    }
+    //Listar todas solicitaçoes
+    @GetMapping("/abono")
+    public ResponseEntity<List<SolicitacaoAbono>> listarSolicitacoes() {
+        try {
+            List<SolicitacaoAbono> solicitacoes = solicitacaoAbonoService.listar();
+            return ResponseEntity.ok(solicitacoes);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erro ao listar solicitações", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @GetMapping("/{id}")
@@ -59,9 +84,8 @@ public class SolicitacaoAbonoController {
         SolicitacaoAbono solicitacao = solicitacaoAbonoService.buscarPorId(id);
         if (solicitacao != null) {
             return ResponseEntity.ok(solicitacao);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
     @DeleteMapping("/{id}")

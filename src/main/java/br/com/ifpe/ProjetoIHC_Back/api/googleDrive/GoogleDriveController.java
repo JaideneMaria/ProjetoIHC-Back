@@ -30,16 +30,16 @@ public class GoogleDriveController {
 
     // Método para fazer upload de um arquivo ao Google Drive
     @PostMapping("/upload")
-public ResponseEntity<String> enviarArquivo(@RequestParam("caminhoArquivo") String caminhoArquivo,
-                                            @RequestParam("nomeArquivo") String nomeArquivo,
-                                            @RequestParam("tipoMime") String tipoMime) {
-    try {
-        String urlArquivo = googleDriveService.enviarArquivo(caminhoArquivo, nomeArquivo, tipoMime);
-        return ResponseEntity.ok("Arquivo enviado com sucesso. Acesse aqui: " + urlArquivo);
-    } catch (Exception e) {
-        LOGGER.log(Level.SEVERE, "Erro ao enviar arquivo", e);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao enviar arquivo.");
-    }
+    public ResponseEntity<String> enviarArquivo(@RequestParam("caminhoArquivo") String caminhoArquivo,
+                                                @RequestParam("nomeArquivo") String nomeArquivo,
+                                                @RequestParam("tipoMime") String tipoMime) {
+        try {
+            String urlArquivo = googleDriveService.enviarArquivo(caminhoArquivo, nomeArquivo, tipoMime);
+            return ResponseEntity.ok("Arquivo enviado com sucesso. Acesse aqui: " + urlArquivo);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erro ao enviar arquivo", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao enviar arquivo.");
+        }
 }
 
 
@@ -55,6 +55,7 @@ public ResponseEntity<String> enviarArquivo(@RequestParam("caminhoArquivo") Stri
         }
     }
 
+    
     @GetMapping("/arquivos/{fileId}")
     public ResponseEntity<File> listarArquivoPorId(@PathVariable("fileId") String fileId) {
         try {

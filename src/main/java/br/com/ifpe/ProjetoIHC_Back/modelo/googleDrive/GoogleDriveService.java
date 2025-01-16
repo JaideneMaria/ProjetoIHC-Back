@@ -93,13 +93,14 @@ public class GoogleDriveService {
         LOGGER.info("Listando arquivos do Google Drive...");
 
         FileList resultado = servicoDrive.files().list()
-                .setPageSize(20) // Ajuste conforme necessário
+                .setPageSize(50) // Ajuste conforme necessário
                 .setFields("files(id, name)")
                 .execute();
 
         return resultado.getFiles();
     }
 
+    
     public File listarArquivoPorId(String fileId) throws IOException {
         LOGGER.log(Level.INFO, "Buscando arquivo com ID: {0}", fileId);
         return servicoDrive.files().get(fileId)

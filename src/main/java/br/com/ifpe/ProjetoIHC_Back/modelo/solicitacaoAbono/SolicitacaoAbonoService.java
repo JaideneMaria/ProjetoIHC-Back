@@ -3,8 +3,12 @@ package br.com.ifpe.ProjetoIHC_Back.modelo.solicitacaoAbono;
 import br.com.ifpe.ProjetoIHC_Back.modelo.googleDrive.GoogleDriveService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+
+
 import jakarta.transaction.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -24,10 +28,15 @@ public class SolicitacaoAbonoService {
      */
     @Transactional
     public SolicitacaoAbono salvar(SolicitacaoAbono solicitacaoAbono) {
-        // Define a solicitação como habilitada ao salvar
         solicitacaoAbono.setHabilitado(Boolean.TRUE);
         return solicitacaoAbonoRepository.save(solicitacaoAbono);
     }
+
+    @Transactional
+    public List<SolicitacaoAbono> listar() {
+        return solicitacaoAbonoRepository.findAll(); 
+}
+
 
     /**
      * Busca uma solicitação pelo ID
@@ -102,4 +111,6 @@ public class SolicitacaoAbonoService {
             throw new Exception("Erro ao fazer upload do anexo: " + e.getMessage());
         }
     }
+
+
 }
