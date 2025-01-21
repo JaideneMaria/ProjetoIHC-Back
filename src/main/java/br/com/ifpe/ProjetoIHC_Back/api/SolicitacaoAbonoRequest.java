@@ -44,22 +44,21 @@ public class SolicitacaoAbonoRequest {
     
     private LocalDateTime dataSolicitacao;
 
-    public SolicitacaoAbono builder(){
-        
-        return SolicitacaoAbono.builder()
-            .nome(nome)
-            .matricula(matricula)
-            .curso(curso)
-            .periodo(periodo)
-            .turno(turno)
-            .email(email)
-            .email(email)
-            .cpf(cpf)
-            .inicioFalta(inicioFalta)
-            .fimFalta(fimFalta)
-            .motivo(motivo)
-            .status(status)
-            .dataSolicitacao(dataSolicitacao)
-            .build();
-    }
+        public SolicitacaoAbono builder(){
+       return SolicitacaoAbono.builder()
+                .nome(nome)
+                .matricula(matricula)
+                .curso(curso)
+                .periodo(periodo)
+                .turno(turno)
+                .email(email)
+                .email(email)
+                .cpf(cpf)
+                .inicioFalta(inicioFalta)
+                .fimFalta(fimFalta)
+                .motivo(motivo)
+                .status(status)
+                .dataSolicitacao(dataSolicitacao)
+                .build();
+        }
 }

@@ -3,14 +3,11 @@ package br.com.ifpe.ProjetoIHC_Back.modelo.solicitacaoAbono;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import jakarta.persistence.*;
 import org.hibernate.annotations.SQLRestriction;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import br.com.ifpe.ProjetoIHC_Back.util.entity.EntidadeAuditavel;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,7 +24,10 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SolicitacaoAbono extends EntidadeAuditavel {
-    
+
+    @Column(insertable=false, updatable=false)
+    private Long Id;
+
     @Column(nullable = false, length = 100)
     private String nome;
 
@@ -71,6 +71,9 @@ public class SolicitacaoAbono extends EntidadeAuditavel {
 
     @Column
     private String observacoes;
+
+    @Column(insertable=false, updatable=false)
+    private Boolean Habilitado;
     
 
     // Define valores padrão antes de persistir no banco
@@ -81,11 +84,28 @@ public class SolicitacaoAbono extends EntidadeAuditavel {
         
         
     }
-    
 
+    public Long getId() {
+        return Id;
+    }
 
-    
+    public String getAnexo() {
+        return anexo;
+    }
 
+    public Boolean getHabilitado() {
+        return Habilitado;
+    }
 
-    
+    public void setId(Long id) {
+        this.Id = id;
+    }
+
+    public void setAnexo(String anexo) {
+        this.anexo = anexo;
+    }
+
+    public void setHabilitado(Boolean habilitado) {
+        this.Habilitado = habilitado;
+    }
 }
