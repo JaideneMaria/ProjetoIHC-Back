@@ -7,6 +7,8 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.SQLRestriction;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import br.com.ifpe.ProjetoIHC_Back.util.entity.EntidadeAuditavel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,17 +18,13 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "solicitacaoAbono")
-@SQLRestriction("habilitado = true")
-
+@SQLRestriction("habilitado = true") // Considera habilitados no banco
 @Builder
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class SolicitacaoAbono extends EntidadeAuditavel {
-
-    @Column(insertable=false, updatable=false)
-    private Long Id;
 
     @Column(nullable = false, length = 100)
     private String nome;
@@ -50,7 +48,7 @@ public class SolicitacaoAbono extends EntidadeAuditavel {
     private String cpf;
 
     @Column(nullable = false, length = 255)
-    private String anexo; // Caminho ou nome do arquivo anexado
+    private String anexo;
 
     @Column(nullable = false)
     @DateTimeFormat(pattern = "dd/MM/yyyy")
@@ -63,49 +61,28 @@ public class SolicitacaoAbono extends EntidadeAuditavel {
     @Column(nullable = false, length = 255)
     private String motivo;
 
-    @Column(nullable = false, length = 20)
-    private String status;
-
     @Column(nullable = false)
     private LocalDateTime dataSolicitacao;
 
     @Column
     private String observacoes;
 
-    @Column(insertable=false, updatable=false)
-    private Boolean Habilitado;
-    
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private StatusSolicitacao status;
 
-    // Define valores padrão antes de persistir no banco
     @PrePersist
     public void prePersist() {
-        this.status = "Pendente";
-        this.dataSolicitacao = LocalDateTime.now();
-        
-        
+        this.status = StatusSolicitacao.PENDENTE; // Define status inicial como "PENDENTE"
+        this.dataSolicitacao = LocalDateTime.now(); // Data de criação
     }
 
-    public Long getId() {
-        return Id;
-    }
-
-    public String getAnexo() {
-        return anexo;
-    }
-
-    public Boolean getHabilitado() {
-        return Habilitado;
-    }
-
-    public void setId(Long id) {
-        this.Id = id;
-    }
-
-    public void setAnexo(String anexo) {
-        this.anexo = anexo;
-    }
-
-    public void setHabilitado(Boolean habilitado) {
-        this.Habilitado = habilitado;
+    /**
+     * Gera uma descrição amigável do status para o frontend via JSON.
+     * @return Uma descrição humanizada do status.
+     */
+    @JsonProperty("statusDescricao") // Define o nome do campo na resposta JSON
+    public String getStatusDescription() {
+        return this.status.getDescricao(); // Utiliza o método do Enum StatusSolicitacao
     }
 }

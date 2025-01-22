@@ -3,11 +3,7 @@ package br.com.ifpe.ProjetoIHC_Back.modelo.solicitacaoAbono;
 import br.com.ifpe.ProjetoIHC_Back.modelo.googleDrive.GoogleDriveService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-
-
 import jakarta.transaction.Transactional;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -20,43 +16,30 @@ public class SolicitacaoAbonoService {
     @Autowired
     private GoogleDriveService googleDriveService;
 
-    /**
-     * Salva uma nova solicitação de abono
-     *
-     * @param solicitacaoAbono - Entidade com os dados da solicitação
-     * @return Salva e retorna a solicitação no banco de dados
-     */
+    
+    //Salva uma nova solicitação de abono
     @Transactional
     public SolicitacaoAbono salvar(SolicitacaoAbono solicitacaoAbono) {
         solicitacaoAbono.setHabilitado(Boolean.TRUE);
         return solicitacaoAbonoRepository.save(solicitacaoAbono);
     }
 
+    
+    //Lista todas as solicitações de abono
     @Transactional
     public List<SolicitacaoAbono> listar() {
-        return solicitacaoAbonoRepository.findAll(); 
-}
+        return solicitacaoAbonoRepository.findAll();
+    }
 
-
-    /**
-     * Busca uma solicitação pelo ID
-     *
-     * @param id - ID da solicitação
-     * @return A entidade correspondente ao ID informado
-     */
+    //Busca uma solicitação pelo ID
+    
     @Transactional
     public SolicitacaoAbono buscarPorId(Long id) {
         Optional<SolicitacaoAbono> solicitacao = solicitacaoAbonoRepository.findById(id);
         return solicitacao.orElse(null); // Retorna null caso não encontre
     }
 
-    /**
-     * Atualiza uma solicitação de abono existente
-     *
-     * @param id                - ID da solicitação a ser atualizada
-     * @param solicitacaoAtualizada - Dados atualizados da solicitação
-     * @return A entidade salva no banco de dados
-     */
+    //Atualiza uma solicitação de abono existente
     @Transactional
     public SolicitacaoAbono atualizar(Long id, SolicitacaoAbono solicitacaoAtualizada) {
         if (solicitacaoAbonoRepository.existsById(id)) {
@@ -73,15 +56,10 @@ public class SolicitacaoAbonoService {
 
             return solicitacaoAbonoRepository.save(solicitacaoAtualizada);
         }
-        return null; // Caso a solicitação não exista
+        return null; 
     }
 
-    /**
-     * Exclui logicamente uma solicitação de abono
-     * Esta operação apenas desabilita a solicitação no banco
-     *
-     * @param id - ID da solicitação a ser desabilitada
-     */
+    //Exclui logicamente uma solicitação de abono
     @Transactional
     public void deletar(Long id) {
         Optional<SolicitacaoAbono> solicitacao = solicitacaoAbonoRepository.findById(id);
@@ -112,5 +90,56 @@ public class SolicitacaoAbonoService {
         }
     }
 
+    //Coloca uma solicitação "Em análise" se estiver "Pendente"
+    @Transactional
+    public SolicitacaoAbono atenderSolicitacao(Long id) {   
+        Optional<SolicitacaoAbono> solicitacaoOptional = solicitacaoAbonoRepository.findById(id);
 
+        if (solicitacaoOptional.isPresent()) {
+            SolicitacaoAbono solicitacao = solicitacaoOptional.get();
+
+            // Só altera para "Em análise" se o status atual for "Pendente"
+            if (solicitacao.getStatus() == StatusSolicitacao.PENDENTE) {
+                solicitacao.setStatus(StatusSolicitacao.EM_ANALISE);
+                return solicitacaoAbonoRepository.save(solicitacao);
+            }
+            // Retorna a própria solicitação sem alteração
+            return solicitacao;
+        } else {
+            throw new RuntimeException("Solicitação não encontrada com o ID: " + id);
+        }
+    }
+
+    //Conclui a solicitação com o status "Deferido" ou "Indeferido"
+    @Transactional
+    public SolicitacaoAbono concluirSolicitacao(Long id, String novoStatus, String justificativa) {
+        Optional<SolicitacaoAbono> solicitacaoOptional = solicitacaoAbonoRepository.findById(id);
+
+        if (solicitacaoOptional.isPresent()) {
+            SolicitacaoAbono solicitacao = solicitacaoOptional.get();
+
+            // Só permite concluir se o status for "Em análise"
+            if (solicitacao.getStatus() != StatusSolicitacao.EM_ANALISE) {
+                throw new IllegalStateException("Somente solicitações 'Em análise' podem ser concluídas.");
+            }
+
+            // Valida entrada obrigatória
+            if (novoStatus == null || justificativa == null || justificativa.isBlank()) {
+                throw new IllegalArgumentException("Status e justificativa são obrigatórios para concluir a solicitação.");
+            }
+
+            // Converte a String para Enum e define o status
+            try {
+                StatusSolicitacao statusEnum = StatusSolicitacao.valueOf(novoStatus.toUpperCase());
+                solicitacao.setStatus(statusEnum);
+                solicitacao.setObservacoes(justificativa);
+
+                return solicitacaoAbonoRepository.save(solicitacao);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Status inválido. Use um dos valores: PENDENTE, EM_ANALISE, DEFERIDO, INDEFERIDO.");
+            }
+        } else {
+            throw new RuntimeException("Solicitação não encontrada com o ID: " + id);
+        }
+    }
 }

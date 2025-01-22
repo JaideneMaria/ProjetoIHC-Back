@@ -1,8 +1,8 @@
-package br.com.ifpe.ProjetoIHC_Back.api;
+package br.com.ifpe.ProjetoIHC_Back.api.solicitacaoAbono;
 
-import br.com.ifpe.ProjetoIHC_Back.modelo.googleDrive.GoogleDriveService;
 import br.com.ifpe.ProjetoIHC_Back.modelo.solicitacaoAbono.SolicitacaoAbono;
 import br.com.ifpe.ProjetoIHC_Back.modelo.solicitacaoAbono.SolicitacaoAbonoService;
+import br.com.ifpe.ProjetoIHC_Back.modelo.googleDrive.GoogleDriveService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,9 +18,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 @RestController
-@RequestMapping("/api/solicitacoes")
+@RequestMapping("/api/solicitacoes") 
 public class SolicitacaoAbonoController {
 
     private static final Logger LOGGER = Logger.getLogger(SolicitacaoAbonoController.class.getName());
@@ -31,11 +30,11 @@ public class SolicitacaoAbonoController {
     @Autowired
     private GoogleDriveService googleDriveService;
 
-    @PostMapping
+    // Criar uma nova solicitação de abono
+    @PostMapping("/abono")
     public ResponseEntity<String> criarSolicitacao(
-        @ModelAttribute SolicitacaoAbono request,
-        @RequestParam("file") MultipartFile file
-    ) {
+            @ModelAttribute SolicitacaoAbono request,
+            @RequestParam("file") MultipartFile file) {
         String filePath = null;
 
         try {
@@ -67,8 +66,9 @@ public class SolicitacaoAbonoController {
             System.err.println("Falha ao deletar arquivo temporário: " + e.getMessage());
         }
     }
-    //Listar todas solicitaçoes
-    @GetMapping("/abono")
+
+    // Listar todas as solicitações de abono
+    @GetMapping
     public ResponseEntity<List<SolicitacaoAbono>> listarSolicitacoes() {
         try {
             List<SolicitacaoAbono> solicitacoes = solicitacaoAbonoService.listar();
@@ -79,6 +79,7 @@ public class SolicitacaoAbonoController {
         }
     }
 
+    // Buscar uma solicitação específica por ID
     @GetMapping("/{id}")
     public ResponseEntity<SolicitacaoAbono> buscarSolicitacaoPorId(@PathVariable Long id) {
         SolicitacaoAbono solicitacao = solicitacaoAbonoService.buscarPorId(id);
@@ -88,6 +89,7 @@ public class SolicitacaoAbonoController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
+    // Deletar uma solicitação de abono
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deletarSolicitacao(@PathVariable Long id) {
         try {
@@ -98,6 +100,7 @@ public class SolicitacaoAbonoController {
         }
     }
 
+    // Atualizar uma solicitação de abono
     @PutMapping("/{id}")
     public ResponseEntity<String> atualizarSolicitacao(@PathVariable Long id, @RequestBody SolicitacaoAbono solicitacaoAtualizada) {
         try {
@@ -107,4 +110,45 @@ public class SolicitacaoAbonoController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao atualizar solicitação: " + e.getMessage());
         }
     }
+
+    // Alterar o status de uma solicitação para "Em análise"
+    @PatchMapping("/{id}/atender")
+    public ResponseEntity<String> atenderSolicitacao(@PathVariable Long id) {
+        try {
+            solicitacaoAbonoService.atenderSolicitacao(id);
+            return ResponseEntity.ok("Solicitação atendida e alterada para 'Em análise'.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao atender solicitação: " + e.getMessage());
+        }
+    }
+
+    // Concluir uma solicitação com estado final (Deferido/Indeferido)
+    @PatchMapping("/{id}/concluir")
+    public ResponseEntity<String> concluirSolicitacao(
+        @PathVariable Long id,
+        @RequestBody ConclusaoSolicitacaoRequest request) { // Mudei para @RequestBody
+    try {
+        String status = request.getStatus();
+        String justificativa = request.getJustificativa();
+
+        solicitacaoAbonoService.concluirSolicitacao(id, status, justificativa);
+        return ResponseEntity.ok("Solicitação concluída com o status: " + status);
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.badRequest().body("Erro de validação: Um ou mais parâmetros são inválidos. Detalhe: " + e.getMessage());
+    } catch (IllegalStateException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(
+            "Erro de estado: A solicitação não está em um status que permita ser finalizada. Detalhe: " + e.getMessage()
+        );
+    } catch (RuntimeException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+            "Erro: A solicitação com o ID " + id + " não foi encontrada no sistema."
+        );
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+            "Erro ao concluir solicitação: Um erro inesperado ocorreu. Por favor, tente novamente. Detalhe: " + e.getMessage()
+        );
+    }
+}
 }
