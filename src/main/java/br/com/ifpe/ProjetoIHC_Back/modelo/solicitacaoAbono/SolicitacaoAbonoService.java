@@ -142,4 +142,24 @@ public class SolicitacaoAbonoService {
             throw new RuntimeException("Solicitação não encontrada com o ID: " + id);
         }
     }
+    // //Aplicando Filtros
+    
+    public List<SolicitacaoAbono> filtrar(StatusSolicitacao status){
+        List<SolicitacaoAbono> listaSolicitacao = solicitacaoAbonoRepository.findAll();
+        if(status == StatusSolicitacao.PENDENTE){
+            listaSolicitacao = solicitacaoAbonoRepository.findByStatus(StatusSolicitacao.PENDENTE);
+        }
+        else if(status == StatusSolicitacao.DEFERIDO){
+            listaSolicitacao = solicitacaoAbonoRepository.findByStatus(StatusSolicitacao.DEFERIDO);
+        }
+        else if(status == StatusSolicitacao.INDEFERIDO){
+            listaSolicitacao = solicitacaoAbonoRepository.findByStatus(StatusSolicitacao.INDEFERIDO);
+        }
+        else if(status == StatusSolicitacao.EM_ANALISE){
+            listaSolicitacao = solicitacaoAbonoRepository.findByStatus(StatusSolicitacao.EM_ANALISE);
+        }
+        return listaSolicitacao;
+    }
+
+    
 }

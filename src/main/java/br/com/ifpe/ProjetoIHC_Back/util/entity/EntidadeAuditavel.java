@@ -7,6 +7,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import br.com.ifpe.ProjetoIHC_Back.modelo.acesso.Usuario;
 import jakarta.persistence.Column;
 import jakarta.persistence.Version;
 import lombok.Getter;
@@ -30,7 +31,7 @@ public abstract class EntidadeAuditavel extends EntidadeNegocio {
 
     @JsonIgnore
     @Column 
-    private Long criadoPor; // Id do usuário que o criou
+    private Usuario criadoPor; 
 
         
     @JsonIgnore

@@ -72,3 +72,4 @@ public class SolicitacaoAbonoRequest {
         return StatusSolicitacao.PENDENTE; 
     }
 }
+

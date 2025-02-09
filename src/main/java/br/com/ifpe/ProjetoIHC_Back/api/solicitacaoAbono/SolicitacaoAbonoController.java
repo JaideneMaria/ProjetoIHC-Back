@@ -2,6 +2,7 @@ package br.com.ifpe.ProjetoIHC_Back.api.solicitacaoAbono;
 
 import br.com.ifpe.ProjetoIHC_Back.modelo.solicitacaoAbono.SolicitacaoAbono;
 import br.com.ifpe.ProjetoIHC_Back.modelo.solicitacaoAbono.SolicitacaoAbonoService;
+import br.com.ifpe.ProjetoIHC_Back.modelo.solicitacaoAbono.StatusSolicitacao;
 import br.com.ifpe.ProjetoIHC_Back.modelo.googleDrive.GoogleDriveService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,12 +32,13 @@ public class SolicitacaoAbonoController {
     @Autowired
     private GoogleDriveService googleDriveService;
 
+   
     // Criar uma nova solicitação de abono
     @PostMapping("/abono")
     public ResponseEntity<String> criarSolicitacao(
             @ModelAttribute SolicitacaoAbono request,
             @RequestParam("file") MultipartFile file) {
-        String filePath = null;
+            String filePath = null;
 
         try {
             filePath = salvarArquivoTemporariamente(file);
@@ -68,7 +71,7 @@ public class SolicitacaoAbonoController {
     }
 
     // Listar todas as solicitações de abono
-    @GetMapping
+    @GetMapping("/abono")
     public ResponseEntity<List<SolicitacaoAbono>> listarSolicitacoes() {
         try {
             List<SolicitacaoAbono> solicitacoes = solicitacaoAbonoService.listar();
@@ -90,7 +93,7 @@ public class SolicitacaoAbonoController {
     }
 
     // Deletar uma solicitação de abono
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/abono/{id}")
     public ResponseEntity<String> deletarSolicitacao(@PathVariable Long id) {
         try {
             solicitacaoAbonoService.deletar(id);
@@ -101,15 +104,15 @@ public class SolicitacaoAbonoController {
     }
 
     // Atualizar uma solicitação de abono
-    @PutMapping("/{id}")
-    public ResponseEntity<String> atualizarSolicitacao(@PathVariable Long id, @RequestBody SolicitacaoAbono solicitacaoAtualizada) {
-        try {
-            solicitacaoAbonoService.atualizar(id, solicitacaoAtualizada);
-            return ResponseEntity.ok("Solicitação atualizada com sucesso!");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao atualizar solicitação: " + e.getMessage());
-        }
-    }
+    // @PutMapping("/{id}")
+    // public ResponseEntity<String> atualizarSolicitacao(@PathVariable Long id, @RequestBody SolicitacaoAbono solicitacaoAtualizada) {
+    //     try {
+    //         solicitacaoAbonoService.atualizar(id, solicitacaoAtualizada);
+    //         return ResponseEntity.ok("Solicitação atualizada com sucesso!");
+    //     } catch (Exception e) {
+    //         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao atualizar solicitação: " + e.getMessage());
+    //     }
+    // }
 
     // Alterar o status de uma solicitação para "Em análise"
     @PatchMapping("/{id}/atender")
@@ -149,6 +152,20 @@ public class SolicitacaoAbonoController {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
             "Erro ao concluir solicitação: Um erro inesperado ocorreu. Por favor, tente novamente. Detalhe: " + e.getMessage()
         );
+        }
     }
-}
+
+    //Realizar o filtro das solicitações
+    @PostMapping("/filtrar")
+    public ResponseEntity<List<SolicitacaoAbono>> filtrar(
+        @RequestParam(required = false) StatusSolicitacao status) {
+        try {
+            List<SolicitacaoAbono> solicitacoes = solicitacaoAbonoService.filtrar(status);
+            return ResponseEntity.ok(solicitacoes);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+
 }
