@@ -9,6 +9,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import br.com.ifpe.ProjetoIHC_Back.modelo.acesso.Usuario;
 import br.com.ifpe.ProjetoIHC_Back.util.entity.EntidadeAuditavel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,6 +26,10 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SolicitacaoAbono extends EntidadeAuditavel {
+
+    @ManyToOne
+    @JoinColumn(name = "criado_por_id", nullable = false)
+    private Usuario criadoPor;
 
     @Column(nullable = false, length = 100)
     private String nome;

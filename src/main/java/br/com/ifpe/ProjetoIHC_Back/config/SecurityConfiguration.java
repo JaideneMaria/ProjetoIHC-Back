@@ -45,24 +45,26 @@ public class SecurityConfiguration {
                 
                 .requestMatchers(HttpMethod.GET, "/api/estudante").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/servidor").permitAll()
-                .requestMatchers(HttpMethod.POST, "api/solicitacoes/testeSenha").permitAll()
+                .requestMatchers(HttpMethod.POST, "api/solicitacoes").permitAll()
 
 
                 //PERMISSÕES ESPECÍFICAS DO ESTUDANTE
                 .requestMatchers(HttpMethod.POST, "/api/solicitacoes/abono").hasAnyAuthority( 
                     Perfil.ROLE_ESTUDANTE // Cadastrar solicitação de Abono
                 )
-                .requestMatchers(HttpMethod.GET, "/api/solicitacoes/abono/*").hasAnyAuthority( 
-                    Perfil.ROLE_ESTUDANTE //Consultar a suas solicitações
-                )
-
-
-                //PERMISSÕES ESPECÍFICAS DO SERVIDOR
+                
+                //PERMISSÕES EM CONJUNTO DE ESTUDANTE E SERVIDOR
                 .requestMatchers(HttpMethod.GET, "/api/solicitacoes").hasAnyAuthority( 
-                    Perfil.ROLE_SERVIDOR // Consultar todas as solicitações dos alunos
+                    Perfil.ROLE_SERVIDOR, // Consultar todas as solicitações dos alunos
+                    Perfil.ROLE_ESTUDANTE // Consultar apenas as suas solicitações
                 )
-                .requestMatchers(HttpMethod.DELETE, "/api/solicitacoes/abono/*").hasAnyAuthority(
+
+                ////PERMISSÕES ESPECÍFICAS DO SERVIDOR
+                .requestMatchers(HttpMethod.DELETE, "/api/solicitacoes/*").hasAnyAuthority(
                     Perfil.ROLE_SERVIDOR //Deletar uma solicitação pelo ID.
+                )
+                .requestMatchers(HttpMethod.GET, "/api/solicitacoes/*").hasAnyAuthority(
+                    Perfil.ROLE_SERVIDOR //Consultar uma solicitação pelo ID.
                 )
                 .requestMatchers(HttpMethod.PATCH, "/api/solicitacoes/{id}/atender").hasAnyAuthority(
                     Perfil.ROLE_SERVIDOR // Alterar o status de uma solicitação para "Em análise"

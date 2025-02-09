@@ -1,5 +1,6 @@
 package br.com.ifpe.ProjetoIHC_Back.modelo.solicitacaoAbono;
 
+import br.com.ifpe.ProjetoIHC_Back.modelo.acesso.Usuario;
 import br.com.ifpe.ProjetoIHC_Back.modelo.googleDrive.GoogleDriveService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,11 @@ public class SolicitacaoAbonoService {
 
     
     //Lista todas as solicitações de abono
+    @Transactional
+    public List<SolicitacaoAbono> listarPorUsuario(Usuario usuario) {
+        return solicitacaoAbonoRepository.findByUsuario(usuario);
+    }
+
     @Transactional
     public List<SolicitacaoAbono> listar() {
         return solicitacaoAbonoRepository.findAll();

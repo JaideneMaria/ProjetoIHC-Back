@@ -1,6 +1,6 @@
 package br.com.ifpe.ProjetoIHC_Back.api.acesso;
 
-import java.io.Serializable;
+//import java.io.Serializable;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
