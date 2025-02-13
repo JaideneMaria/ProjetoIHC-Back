@@ -82,10 +82,7 @@ public class SolicitacaoAbono extends EntidadeAuditavel {
         this.dataSolicitacao = LocalDateTime.now(); // Data de criação
     }
 
-    /**
-     * Gera uma descrição amigável do status para o frontend via JSON.
-     * @return Uma descrição humanizada do status.
-     */
+    
     @JsonProperty("statusDescricao") // Define o nome do campo na resposta JSON
     public String getStatusDescription() {
         return this.status.getDescricao(); // Utiliza o método do Enum StatusSolicitacao
