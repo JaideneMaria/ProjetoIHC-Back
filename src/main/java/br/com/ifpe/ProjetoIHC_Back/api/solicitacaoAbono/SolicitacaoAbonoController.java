@@ -25,6 +25,7 @@
     import java.util.logging.Logger;
 
     @RestController
+    @CrossOrigin
     @RequestMapping("/api/solicitacoes") 
     public class SolicitacaoAbonoController {
 
