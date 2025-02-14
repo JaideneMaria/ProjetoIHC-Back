@@ -23,12 +23,18 @@ import lombok.Setter;
 public class Perfil extends EntidadeNegocio implements GrantedAuthority {
 
     public static final String ROLE_ESTUDANTE = "ESTUDANTE";
-    public static final String ROLE_SERVIDOR = "SERVIDOR"; // READ, DELETE, WRITE, UPDATE.
+    public static final String ROLE_SERVIDOR = "SERVIDOR";
 
     private String nome;
 
     @Override
     public String getAuthority() {
+        return this.nome;
+    }
+
+    // Sobrescrevendo o método toString para garantir que o nome do perfil seja retornado
+    @Override
+    public String toString() {
         return this.nome;
     }
 }

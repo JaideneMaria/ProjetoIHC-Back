@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import br.com.ifpe.ProjetoIHC_Back.modelo.acesso.Usuario;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -36,9 +38,14 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    public String generateToken(UserDetails userDetails) {
+    // Modificado para aceitar Usuario ao invés de UserDetails
+    public String generateToken(Usuario usuario) {
+        Map<String, Object> extraClaims = new HashMap<>();
+        
+        // Aqui estamos passando o perfil do usuário
+        extraClaims.put("perfil", usuario.getAuthorities().stream().findFirst().get().getAuthority());
 
-        return generateToken(new HashMap<>(), userDetails);
+        return buildToken(extraClaims, usuario, jwtExpiration);
     }
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
@@ -47,9 +54,9 @@ public class JwtService {
     }
 
     public long getExpirationTime() {
-
         return jwtExpiration;
     }
+
     private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
 
         return Jwts
@@ -95,4 +102,3 @@ public class JwtService {
     }
 
 }
-
